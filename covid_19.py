@@ -121,7 +121,7 @@ def normalizeMaxRow(row, index):
 
 index = 0
 
-nor_contryarr = np.zeros([1,65], dtype='float32')
+nor_contryarr = np.zeros([1,len(uniq_curve_df.columns)], dtype='float32')
 for row in contryarr:
     # use simple normailize China and Korea's Data
     # since the curve is long enough, not need estimate max
@@ -190,7 +190,7 @@ history = model.fit(train_x,
 # find the Day Bias such that the data of the country is closet to the model
 def bestfit_day(contry_nparr):
     bestfit = {}
-    for i in range(64):
+    for i in range(len(uniq_curve_df.columns)-1):
         bestfit[i]=model.evaluate(train_x[0:len(train_x)-i],
                                   contry_nparr[i:],
                                   verbose=0)
@@ -280,11 +280,11 @@ for k, v in ts_from500.items():
     popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,10000.,0.02],[60.,200000.,0.5]))
     print(popt)
     params[k] = popt
-    for i in range(65):
+    for i in range(len(uniq_curve_df.columns)):
         y_pred = logistic_fun(i, popt[0], popt[1], popt[2])
         #print(y_pred)
         pred_temp.append(y_pred)
-    pred_logi[k] = (range(65), np.asarray(pred_temp))
+    pred_logi[k] = (range(len(uniq_curve_df.columns)), np.asarray(pred_temp))
 
 #pred_logi
 

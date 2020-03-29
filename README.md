@@ -24,9 +24,25 @@ The model is trained by using China's Data, and the validation data is Korea's D
 Use the model to evaluate the time series of each country. In each iteration, move the time series to left, and test the `Best Fit Day`. Move the curve (time series) of each country to the best position, and draw the figure below. 
   
 Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted.  
-
+  
 <img src="./result.png">  
+  
 
+3/28: The actual increasing speed is slightly slower than the curve predicted at 3/26.  
+  
+## Logistic Method  
+Use `curve_fit(logistic_func, x, y)` to fit each country's time series. Day: `500 Day`  
+`Mid`: sigmoid's midpoint  
+`Max`: curve's maximum value  
+`Lrate`: logistic growth rate  
+  
+Assuming that each country's time series obey the logistic function (fitted by itself), the 
+future curve can be predicted.
+  
+<img src="./logi.png">  
+  
+3/28: The logistic rate keep the same, and more time to reach the maximum value.  
+  
 ## Reference and Acknowledgment  
 CSSEGISandData, https://systems.jhu.edu/, https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
   
