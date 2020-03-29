@@ -5,16 +5,20 @@ The original data is `time_series_covid19_confirmed_global.csv` from CSSEGISandD
 The data contains `Province/State` field, and this field is compressed into `Country/Region`. 
 Then, the countries of the top 10 number of confirmed cases are selected and transposed as `main DataFrame`.  
   
-The dates of top 10 countries who reached first 500 or more cases are obtained as `500 Day`. 
+The dates of top 10 countries who reached first 500 or more cases are obtained as `From 500 Day`. 
 Then, the time series of each country are normalized by the method below.  
 Notice that China and Korea's Data is just used `Row ← Row/MaxOfCurrData` to normalize since the curves of China and Korea are long enough to reach a reasonable maximum value (not needed to estimate).
 
-* Normalize Method  
+* Normalization Method 1  
 `Ratio`  
 `= MaxNumberOfCurrData/China'sData[CurrentDay-500Day]`  
 `= MaxNumberOfCurrData/China'sData[DiffDaysFrom500OfCurrData]`  
 `= MaxNumberOfCurrData/China'sNumberWithDiff`  
 `EstimatedMaxOfCurrData = Ratio*China'sMax`  
+`Row ← Row/EstimatedMaxOfCurrData`  
+
+* Normalization Method 2  
+`EstimatedMaxOfCurrData = MaxOfLogisticFunc(From Logistic Method)`  
 `Row ← Row/EstimatedMaxOfCurrData`  
 
 ## Model Training
@@ -23,15 +27,18 @@ The model is trained by using China's Data, and the validation data is Korea's D
 ## Result Analysis
 Use the model to evaluate the time series of each country. In each iteration, move the time series to left, and test the `Best Fit Day`. Move the curve (time series) of each country to the best position, and draw the figure below. 
   
-Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted.  
+Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted. The Day is `Stage Day`.  
   
+### Normalization Method 1 (total MSE=0.010943, Iran excepted)  
 <img src="./result.png">  
   
-
 3/28: The actual increasing speed is slightly slower than the curve predicted at 3/26.  
   
+### Normalization Method 2 (total MSE=0.007158, Iran excepted)  
+<img src="./resultlogi.png">  
+  
 ## Logistic Method  
-Use `curve_fit(logistic_func, x, y)` to fit each country's time series. Day: `500 Day`  
+Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day is `From 500 Day`.  
 `Mid`: sigmoid's midpoint  
 `Max`: curve's maximum value  
 `Lrate`: logistic growth rate  

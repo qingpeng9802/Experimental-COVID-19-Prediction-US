@@ -96,7 +96,7 @@ order_contry_bias
 contryarr = curve_data_df.to_numpy(dtype='float32')
 contryarr
 
-"""### Normalize Method:  
+"""### Normalization Method 1  
 $Ratio\\
 =\dfrac{MaxNumberOfCurrData}{China'sData[CurrentDay-500Day]}\\
 =\dfrac{MaxNumberOfCurrData}{China'sData[DiffDaysFrom500OfCurrData]}\\
@@ -114,9 +114,11 @@ def normalizeMaxRow(row, index):
     chinaRefer = contryarr[1][len(row) - order_contry_bias[index]]
 
     ratio = currRefer/chinaRefer
-    print(ratio)
-    estimated_m = ratio*max(contryarr[1])
+    print(index, ratio)
     
+    estimated_m = ratio*max(contryarr[1])
+    print(index, estimated_m)
+
     return row/estimated_m
 
 index = 0
@@ -126,7 +128,7 @@ for row in contryarr:
     # use simple normailize China and Korea's Data
     # since the curve is long enough, not need estimate max
     if index in [1, 9]:
-        print(1)
+        print(index, 1)
         new_row = row/(np.max(row))
     else:
         new_row = normalizeMaxRow(row, index)
@@ -195,7 +197,7 @@ def bestfit_day(contry_nparr):
                                   contry_nparr[i:],
                                   verbose=0)
     key_min = min(bestfit.keys(), key=(lambda k: bestfit[k]))
-    return key_min
+    return key_min, bestfit[key_min]
 
 def getCountryNum(num):
     return{
@@ -212,15 +214,19 @@ def getCountryNum(num):
 
 
 bias_day = {}
+totalmse = 0.0
 index = 0
 for contry in nor_contryarr:
     #print(contry)
     train_temp = prepare_train_data(contry)
-    bias_day[getCountryNum(index)] = bestfit_day(train_temp)
+    bias_day[getCountryNum(index)], mse = bestfit_day(train_temp)
+    if index!=6:
+        totalmse += mse
     index+=1
 
 # The days that the curve needed to move left
-bias_day
+print(bias_day)
+print(totalmse)
 
 #!rm -rf ./logs
 
@@ -277,7 +283,7 @@ pred_logi = {}
 params = {}
 for k, v in ts_from500.items():
     pred_temp = []
-    popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,10000.,0.02],[60.,200000.,0.5]))
+    popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,9000.,0.02],[60.,300000.,0.8]))
     print(popt)
     params[k] = popt
     for i in range(len(uniq_curve_df.columns)):
@@ -330,3 +336,112 @@ for k, v in ts_from500.items():
     index+=1
 
 plt.legend(loc='upper left')
+
+"""## Normalization Method 2
+
+$EstimatedMaxOfCurrData = MaxOfLogisticFunc$
+  
+$\textbf{Row}\leftarrow\textbf{Row}/EstimatedMaxOfCurrData$
+"""
+
+# Normalize the data of each contry
+def normalizeMaxRowLogi(row, index):
+    estimated_m = params[index][1]
+    return row/estimated_m
+
+index = 0
+
+norlogi_contryarr = np.zeros([1,len(uniq_curve_df.columns)], dtype='float32')
+for row in contryarr:
+    new_row = normalizeMaxRowLogi(row, index)
+    norlogi_contryarr = np.append(norlogi_contryarr, np.asarray([new_row], dtype='float32'), axis=0)
+    index+=1
+norlogi_contryarr = np.delete(norlogi_contryarr, [0], axis=0)
+norlogi_contryarr
+
+# TensorBoard
+logdir = "logs/scalars/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+file_writer = tf.summary.create_file_writer(logdir + "/metrics")
+file_writer.set_as_default()
+tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+
+# Build model
+tf.random.set_seed(1)
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Dense(32, activation='sigmoid'))
+model.add(tf.keras.layers.Conv1D(filters=32, kernel_size=7, padding='same'))
+model.add(tf.keras.layers.Dense(32, activation='sigmoid'))
+model.add(tf.keras.layers.Conv1D(filters=32, kernel_size=7, padding='same'))
+model.add(tf.keras.layers.Dense(32, activation='sigmoid'))
+model.add(tf.keras.layers.Dropout(0.005))
+model.add(tf.keras.layers.Dense(32, activation='sigmoid'))
+model.add(tf.keras.layers.Dense(1))
+#model.summary()
+
+model.compile(loss='mse', optimizer=tf.keras.optimizers.Adam(0.001))
+
+# prepare train data
+train_y = prepare_train_data(norlogi_contryarr[1])
+print(train_y.shape)
+
+train_x = np.asarray([np.arange(len(curve_data_df.columns), dtype='float32')])
+train_x = np.transpose(train_x)
+train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], 1))
+print(train_x.shape)
+
+# prepare validatation data (Korea's Data)
+korea_y = prepare_train_data(norlogi_contryarr[9])
+print(korea_y.shape)
+
+history = model.fit(train_x,
+          train_y,
+          epochs=70,
+          validation_data=(train_x, korea_y),
+          callbacks=[tensorboard_callback],
+          verbose=1)
+
+bias_day = {}
+totalmse = 0.0
+index = 0
+for contry in norlogi_contryarr:
+    #print(contry)
+    train_temp = prepare_train_data(contry)
+    bias_day[getCountryNum(index)], mse = bestfit_day(train_temp)
+    if index!=6:
+        totalmse += mse
+    index+=1
+
+# The days that the curve needed to move left
+print(bias_day)
+print(totalmse)
+
+pred = np.array([])
+for date in train_x:
+    date = np.asarray([[[date.item()]]])
+    c = model.predict(date)
+    pred = np.concatenate((pred, c[0][0]))
+
+# The prediction curve by the model based on China's Data
+pred = pred.flatten()
+
+plt.rcParams.update({'font.size': 20})
+fig, ax = plt.subplots()
+fig.set_size_inches(30, 15)
+plt.xlabel('Day')
+plt.ylabel("Confirmed Number")
+
+plt.plot(train_x.reshape(-1), pred, '-o', label="PredictionCurve w/ China", c='black')
+
+index = 0
+for c in ['US','China','Italy','Spain','Germany','France','Iran',
+          'United Kingdom','Switzerland','Korea, South']:
+    labelStr = c + " \n" + str(len(train_x)-bias_day[c]) + ' Days'
+    plt.plot(train_x[0:len(train_x)-bias_day[c]].reshape(-1), norlogi_contryarr[index][bias_day[c]:], '-o', label=labelStr)
+    plt.annotate(str(len(train_x)-bias_day[c]),
+                 xy=(train_x[0:len(train_x)-bias_day[c]].reshape(-1)[-1],
+                     norlogi_contryarr[index][bias_day[c]:][-1]),
+                  xytext=(5,0),
+                  textcoords='offset points')
+    index+=1
+
+plt.legend()
