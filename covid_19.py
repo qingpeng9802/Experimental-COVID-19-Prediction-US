@@ -257,4 +257,76 @@ plt.legend()
 
 """### Figure Confirmed Number vs Day:  
 According to China's Data and the prediction curve, the number of increasing patients is slowing down at about Day 35. This means that the US might need to take 35-18=17 Days as 3/26/20 to get slowing down curve. That is, the slowing down date is about 4/12/20, and the curve would be flat at about 4/17/20.
+
+# Logistic Function Method
 """
+
+# slice the time series of each country by the day of reaching >500 cases
+ts_from500 = {}
+for k, v in order_contry_bias.items():
+    ts_from500[k] = (np.asarray([i for i in range(len(uniq_curve_df.columns)-v)]), contryarr[k][v:])
+    print(k, len(ts_from500[k][0]), len(ts_from500[k][1]))
+
+from scipy.optimize import curve_fit
+def logistic_fun(x, x0, L, k):
+    return L / (1.0 + np.exp(-k * (x - x0)))
+
+# fit current data of each country with logistic function,
+# and predict future curve by its own logistic function
+pred_logi = {}
+params = {}
+for k, v in ts_from500.items():
+    pred_temp = []
+    popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,10000.,0.02],[60.,200000.,0.5]))
+    print(popt)
+    params[k] = popt
+    for i in range(65):
+        y_pred = logistic_fun(i, popt[0], popt[1], popt[2])
+        #print(y_pred)
+        pred_temp.append(y_pred)
+    pred_logi[k] = (range(65), np.asarray(pred_temp))
+
+#pred_logi
+
+#params
+
+plt.rcParams.update({'font.size': 16})
+fig, ax = plt.subplots()
+fig.set_size_inches(30, 15)
+plt.xlabel('Day')
+plt.ylabel("Confirmed Number")
+
+index = 0
+for k, v in pred_logi.items():
+    plt.plot(v[0], v[1], '-o', label='_nolegend_')
+    plt.annotate(str(len(v[0])),
+                 xy=(v[0][-1], v[1][-1]),
+                  xytext=(5,0),
+                  textcoords='offset points')
+    index+=1
+
+def getCountryNum(num):
+    return{
+    0:'US',
+    1:'China',
+    2:'Italy',
+    3:'Spain',
+    4:'Germany',
+    5:'France',
+    6:'Iran',
+    7:'United Kingdom',
+    8:'Switzerland',
+    9:'Korea, South'}.get(num)
+
+index = 0
+for k, v in ts_from500.items():
+    labelStr = getCountryNum(k) + " \n" + str(len(v[0])) + ' Days\n' + 'Mid: ' + '{:.2f}'.format(params[k][0]) + ' Max: ' + '{:.0f}'.format(params[k][1]) + ' Lrate: ' + '{:.2f}'.format(params[k][2])
+    
+    plt.plot(v[0], v[1], '-o', label=labelStr)
+    plt.annotate(str(len(v[0])),
+                 xy=(v[0][-1], v[1][-1]),
+                  xytext=(5,0),
+                  textcoords='offset points')
+    index+=1
+
+plt.legend(loc='upper left')
