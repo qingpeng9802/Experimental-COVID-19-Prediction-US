@@ -48,7 +48,7 @@ future curve can be predicted.
   
 <img src="./logi.png">  
   
-3/28: The logistic rate keep the same, and more time to reach the maximum value.  
+3/28: The logistic rate is slightly lower, and need more time to reach the maximum value.  
   
 ## Reference and Acknowledgment  
 CSSEGISandData, https://systems.jhu.edu/, https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
