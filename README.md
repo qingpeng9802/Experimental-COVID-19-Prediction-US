@@ -30,12 +30,12 @@ Use the model to evaluate the time series of each country. In each iteration, mo
 Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted. The Day is `Stage Day`.  
   
 ### Normalization Method 1 (total MSE=0.010943, Iran excepted)  
-<img src="./result.png">  
+<img src="./figs/result.png">  
   
 3/28: The actual increasing speed is slightly slower than the curve predicted at 3/26.  
   
 ### Normalization Method 2 (total MSE=0.007158, Iran excepted)  
-<img src="./resultlogi.png">  
+<img src="./figs/resultlogi.png">  
   
 ## Logistic Method  
 Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day is `From 500 Day`.  
@@ -46,7 +46,7 @@ Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day 
 Assuming that each country's time series obey the logistic function (fitted by itself), the 
 future curve can be predicted.
   
-<img src="./logi.png">  
+<img src="./figs/logi.png">  
   
 3/28: The logistic rate is slightly lower, and need more time to reach the maximum value.  
   
