@@ -37,6 +37,8 @@ Assuming that each country's time series obey the same pattern as China's Data, 
 ### Normalization Method 2 (total MSE=0.007158, Iran excepted)  
 <img src="./figs/resultlogi.png">  
   
+By 3/28, The slowing down date of the US is about 4/15.  
+  
 ## Logistic Method  
 Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day is `From 500 Day`.  
 `Mid`: sigmoid's midpoint  
@@ -47,6 +49,8 @@ Assuming that each country's time series obey the logistic function (fitted by i
 future curve can be predicted.
   
 <img src="./figs/logi.png">  
+  
+By 3/28, The slowing down date of the US is about 4/11.  
   
 3/28: The logistic rate is slightly lower, and need more time to reach the maximum value.  
   
