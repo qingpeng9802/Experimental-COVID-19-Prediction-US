@@ -111,7 +111,7 @@ $\textbf{Row}\leftarrow\textbf{Row}/EstimatedMaxOfCurrData$
 def normalizeMaxRow(row, index):
 
     currRefer = row[len(row)-1]
-    chinaRefer = contryarr[1][len(row) - order_contry_bias[index]]
+    chinaRefer = contryarr[1][len(row) - order_contry_bias[index]-1]
 
     ratio = currRefer/chinaRefer
     print(index, ratio)
@@ -283,7 +283,7 @@ pred_logi = {}
 params = {}
 for k, v in ts_from500.items():
     pred_temp = []
-    popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,9000.,0.02],[60.,300000.,0.8]))
+    popt, pcov = curve_fit(logistic_fun, ts_from500[k][0], ts_from500[k][1], bounds=([10.,9000.,0.02],[60.,1000000.,0.8]))
     print(popt)
     params[k] = popt
     for i in range(len(uniq_curve_df.columns)):
@@ -415,14 +415,14 @@ for contry in norlogi_contryarr:
 print(bias_day)
 print(totalmse)
 
-pred = np.array([])
+pred_nor2 = np.array([])
 for date in train_x:
     date = np.asarray([[[date.item()]]])
     c = model.predict(date)
-    pred = np.concatenate((pred, c[0][0]))
+    pred_nor2 = np.concatenate((pred_nor2, c[0][0]))
 
 # The prediction curve by the model based on China's Data
-pred = pred.flatten()
+pred_nor2 = pred_nor2.flatten()
 
 plt.rcParams.update({'font.size': 20})
 fig, ax = plt.subplots()
@@ -430,7 +430,7 @@ fig.set_size_inches(30, 15)
 plt.xlabel('Day')
 plt.ylabel("Confirmed Number")
 
-plt.plot(train_x.reshape(-1), pred, '-o', label="PredictionCurve w/ China", c='black')
+plt.plot(train_x.reshape(-1), pred_nor2, '-o', label="PredictionCurve w/ China", c='black')
 
 index = 0
 for c in ['US','China','Italy','Spain','Germany','France','Iran',
