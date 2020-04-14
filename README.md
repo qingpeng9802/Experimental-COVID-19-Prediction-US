@@ -29,19 +29,22 @@ Use the model to evaluate the time series of each country. In each iteration, mo
   
 Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted. The Day is `Stage Day`.  
   
-### Normalization Method 1 (total MSE=0.016026, Iran excepted)  
+### Normalization Method 1 (total MSE=0.0148753, Iran excepted)  
 <img src="./figs/result.png">  
   
 3/28: The actual increasing speed is slightly slower than the curve predicted at 3/26.  
-4/5: The actual increasing speed is 1 day later than the curve predicted at 3/28.   
+4/5: The actual increasing speed is 1 day later than the curve predicted at 3/28.  
+4/13： The actual increasing speed is 4 day later than the curve predicted at 4/5, which means the increasing speed is lower quickly (but probably this means the method has a larger error near to the midpoint of the curve according to Method 2 result).  
   
-### Normalization Method 2 (total MSE=0.009515, Iran excepted)  
+### Normalization Method 2 (total MSE=0.0124100, Iran excepted)  
 <img src="./figs/resultlogi.png">  
   
 4/5: The actual increasing speed is 4 day later than the curve predicted at 3/28, which means the increasing speed is significantly lower than before, and the social distancing is working.  
+4/13： The actual increasing speed is 2 day later than the curve predicted at 4/5, which means the increasing speed is still keeping lower (the curve will be slowing down soon based on the curve).  
 
 By 3/28, the slowing down date of the US is about 4/15.  
-By 4/5, the slowing down date of the US is about 4/18.   
+By 4/5, the slowing down date of the US is about 4/18.  
+By 4/13, the slowing down date of the US is about 4/21.  
   
 ## Logistic Method  
 Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day is `From 500 Day`.  
@@ -56,9 +59,11 @@ future curve can be predicted.
   
 3/28: The logistic rate is slightly lower, and need more time to reach the maximum value.   
 4/5: The logistic curve looks like predicting very well (8 days past from 3/28). The logistic rate become reasonable compared to other countries. However, due to the initial speed is too high, the final cases might reach 50,0000+.  
+4/13: The logistic curve looks like predicting very well (8 days past from 4/5). The logistic rate is lower and more close to other countries. The final cases might reach about 70,0000.  
   
 By 3/28, the slowing down date of the US is about 4/11.  
 By 4/5, the slowing down date of the US is about 4/18.  
+By 4/13, the slowing down date of the US is about 4/18.  
   
 ## Reference and Acknowledgment  
 CSSEGISandData, https://systems.jhu.edu/, https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
