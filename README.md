@@ -22,29 +22,32 @@ Notice that China and Korea's Data is just used `Row ← Row/MaxOfCurrData` to n
 `Row ← Row/EstimatedMaxOfCurrData`  
 
 ## Model Training
-The model is trained by using China's Data, and the validation data is Korea's Data. Repeatly train `70` epochs, and get `- loss: 9.1215e-04 - val_loss: 0.1536`. 
+The model is trained by using China's Data, and the validation data is Korea's Data. Repeatly train `70` epochs, and get `- loss: 6.9204e-04 - val_loss: 0.1572`. 
 
 ## Result Analysis
 Use the model to evaluate the time series of each country. In each iteration, move the time series to left, and test the `Best Fit Day`. Move the curve (time series) of each country to the best position, and draw the figure below. 
   
 Assuming that each country's time series obey the same pattern as China's Data, the slowing down date of the US can be predicted. The Day is `Stage Day`.  
   
-### Normalization Method 1 (total MSE=0.0148753, Iran excepted)  
+### Normalization Method 1 (total MSE=0.0203977, Iran excepted)  
 <img src="./figs/result.png">  
   
 3/28: The actual increasing speed is slightly slower than the curve predicted at 3/26.  
 4/5: The actual increasing speed is 1 day later than the curve predicted at 3/28.  
-4/13： The actual increasing speed is 4 day later than the curve predicted at 4/5, which means the increasing speed is lower quickly (but probably this means the method has a larger error near to the midpoint of the curve according to Method 2 result).  
+4/13: The actual increasing speed is 4 day later than the curve predicted at 4/5, which means the increasing speed is lower quickly (but probably this means the method has a larger error near to the midpoint of the curve according to Method 2 result).  
+4/21: The actual increasing speed is still 4 day later than the curve predicted at 4/13. Continuous predict delay might means that the model is about 2x faster than actual speed. Thus, the slowing down date of the US is about 8+4=12 days later, which is 5/3.  
   
-### Normalization Method 2 (total MSE=0.0124100, Iran excepted)  
+### Normalization Method 2 (total MSE=0.0291249, Iran excepted)  
 <img src="./figs/resultlogi.png">  
   
 4/5: The actual increasing speed is 4 day later than the curve predicted at 3/28, which means the increasing speed is significantly lower than before, and the social distancing is working.  
-4/13： The actual increasing speed is 2 day later than the curve predicted at 4/5, which means the increasing speed is still keeping lower (the curve will be slowing down soon based on the curve).  
+4/13: The actual increasing speed is 2 day later than the curve predicted at 4/5, which means the increasing speed is still keeping lower (the curve will be slowing down soon based on the curve).  
+4/21: The actual increasing speed is still 2 day later than the curve predicted at 4/13, which means this model might be 25% faster. Bias the predict by 6+2=8 days.
 
 By 3/28, the slowing down date of the US is about 4/15.  
 By 4/5, the slowing down date of the US is about 4/18.  
 By 4/13, the slowing down date of the US is about 4/21.  
+By 4/21, the slowing down date of the US is about 4/29. 
   
 ## Logistic Method  
 Use `curve_fit(logistic_func, x, y)` to fit each country's time series. The Day is `From 500 Day`.  
@@ -59,12 +62,14 @@ future curve can be predicted.
   
 3/28: The logistic rate is slightly lower, and need more time to reach the maximum value.   
 4/5: The logistic rate become reasonable compared to other countries. However, due to the initial speed is too high, the final cases might reach 50,0000+.  
-4/13: The logistic rate is lower and more close to other countries. The final cases might reach about 70,0000.  
+4/13: The logistic rate is lower and more close to other countries. The final cases might reach about 700,000.  
+4/21: The logistic rate is at the same level compared to other countries. The final cases might reach about 900,000+300,000=1,200,000. (since current predict model is underestimated about 200,000 per 8 days, 300,000 is added by 12 days.)  
   
 By 3/28, the slowing down date of the US is about 4/11.  
 By 4/5, the slowing down date of the US is about 4/18.  
 By 4/13, the slowing down date of the US is about 4/22.  
-  
+By 4/21, the slowing down date of the US is about 5/3.  
+
 ## Reference and Acknowledgment  
 CSSEGISandData, https://systems.jhu.edu/, https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
   
