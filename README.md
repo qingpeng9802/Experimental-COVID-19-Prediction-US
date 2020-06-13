@@ -70,8 +70,13 @@ By 4/5, the slowing down date of the US is about 4/18.
 By 4/13, the slowing down date of the US is about 4/22.  
 By 4/21, the slowing down date of the US is about 5/3.  
 
+## Last Update
+The initial idea is that since this virus is a new virus, we didn't have enough information about it, but we still want to simulate and project the case curve with limited data and information. Thus, we just assume that each country's time series obey the same pattern as China's Data, which is "pattern matching" method. However, we noticed that the Institute for Health Metrics and Evaluation (IHME) used similar method in their very early version, and through further observation, the accuracy of their prediction is very poor. Thus, we just gave up this model and idea. Moreover, due to the influence of multiple factors, the statistics of the number of positive cases are not accurate and stable in fact, so it is better to use the death cases to model. 
+  
+Currently, we think the best projection for COVID-19 is [covid19-projections.com](https://covid19-projections.com/), [Youyang Gu GitHub](https://github.com/youyanggu/covid19_projections).
+
 ## Reference and Acknowledgment  
-CSSEGISandData, https://systems.jhu.edu/, https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
+CSSEGISandData, [CSSE](https://systems.jhu.edu/), [CSSE GitHub](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data)
   
 ## Disclaimer  
 All information, content, and material of this project is for informational and academic purposes only and are not intended to serve as a substitute for the consultation, diagnosis, and/or medical treatment of a qualified physician or healthcare provider.
